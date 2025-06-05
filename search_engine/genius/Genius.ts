@@ -412,16 +412,16 @@ class Genius {
     }
 
     // Add this method before getLyrics
-    private async randomDelay(min: number = 1, max: number = 3): Promise<void> {
-        const delayMs = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-        return new Promise(resolve => setTimeout(resolve, delayMs));
-    }
+    // private async randomDelay(min: number = 1, max: number = 3): Promise<void> {
+    //     const delayMs = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
+    //     return new Promise(resolve => setTimeout(resolve, delayMs));
+    // }
 
     // Replace the existing getLyrics method with this:
     async getLyrics(title: string, artist: string, slug: string): Promise<LyricsResponse | ErrorResponse> {
         try {
             // Add random delay before making the request
-            await this.randomDelay(1, 3);
+            // await this.randomDelay(1, 3);
 
             const lyricsUrl = `https://genius.com/${slug}`;
             const lyricsHtml = await this.get(lyricsUrl);
