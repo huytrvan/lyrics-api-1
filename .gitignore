@@ -6,3 +6,4 @@ musixmatch_store/
 proxy_cache/
 Dockerfile
 .dockerignore
+_*.ts
