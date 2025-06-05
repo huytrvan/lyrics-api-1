@@ -27,9 +27,9 @@ function logDetails(req: Request, res: Response, next: NextFunction) {
 }
 
 app.use(logDetails);
-app.use(musixmatch);
+// app.use(musixmatch);
 app.use(genius);
-app.use(youtube);
+// app.use(youtube);
 
 app.get('/', async (req, res) => {
     res.sendFile(path.join(__dirname, 'documentation', 'index.html'));

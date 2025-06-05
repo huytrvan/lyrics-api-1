@@ -4,15 +4,14 @@ import log from "../../utils/logger";
 import fs from 'fs/promises';
 import path from 'path';
 
-interface LyricsResponse {
-    artist_name: string;
-    track_name: string;
-    search_engine: string;
-    artwork_url: string | null;
+export interface LyricsResponse {
+    title: string;
+    artist: string;
+    slug: string;
     lyrics: string;
 }
 
-interface ErrorResponse {
+export interface ErrorResponse {
     message: string;
     response: string;
 }
@@ -412,48 +411,19 @@ class Genius {
         };
     }
 
-    async getLyrics(title: string, api_key: string | null = null, artist?: string): Promise<LyricsResponse | ErrorResponse> {
+    // Add this method before getLyrics
+    private async randomDelay(min: number = 1, max: number = 3): Promise<void> {
+        const delayMs = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
+        return new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+
+    // Replace the existing getLyrics method with this:
+    async getLyrics(title: string, artist: string, slug: string): Promise<LyricsResponse | ErrorResponse> {
         try {
-            const headers: Record<string, string> = {};
-            if (api_key) {
-                headers['Authorization'] = `Bearer ${api_key}`;
-            }
+            // Add random delay before making the request
+            await this.randomDelay(1, 3);
 
-            // Build search query - include artist if provided
-            let searchQuery = title;
-            if (artist) {
-                searchQuery = `${title} ${artist}`;
-            }
-
-            const searchResponse = await this.get(`${this.geniusURL}?q=${encodeURIComponent(searchQuery)}`, headers);
-
-            const data = JSON.parse(searchResponse);
-            if (data.meta.status !== 200 || !data.response.hits.length) {
-                throw new Error('No lyrics results found.');
-            }
-
-            // If artist is provided, try to find a better match
-            let bestMatch = data.response.hits[0].result;
-
-            if (artist && data.response.hits.length > 1) {
-                // Look for a match that includes the artist name
-                const artistLower = artist.toLowerCase();
-                for (const hit of data.response.hits) {
-                    const resultArtist = hit.result.primary_artist.name.toLowerCase();
-                    if (resultArtist.includes(artistLower) || artistLower.includes(resultArtist)) {
-                        bestMatch = hit.result;
-                        break;
-                    }
-                }
-            }
-
-            const result = bestMatch;
-            const track_name = result.title;
-            const artist_name = result.primary_artist.name;
-            const artwork_url = result.song_art_image_thumbnail_url || null;
-            const search_engine = 'Genius';
-
-            const lyricsUrl = result.url;
+            const lyricsUrl = `https://genius.com/${slug}`;
             const lyricsHtml = await this.get(lyricsUrl);
 
             const $ = cheerio.load(lyricsHtml);
@@ -472,29 +442,18 @@ class Genius {
                     .replace(/<(?!br\s*\/?)[^>]+>/gi, '')
                     .trim();
                 if (snippet) lyrics += snippet + "\n\n";
-                // if (snippet) {
-                //     // Split by lines and filter out section labels like [Verse 1], [Chorus], etc.
-                //     const filteredLines = snippet
-                //         .split('\n')
-                //         .filter(line => {
-                //             const trimmedLine = line.trim();
-                //             // Skip lines that are section labels (start with [ and end with ])
-                //             return !(trimmedLine.startsWith('[') && trimmedLine.endsWith(']'));
-                //         })
-                //         .join('\n')
-                //         .trim();
-
-                //     if (filteredLines) {
-                //         lyrics += filteredLines + "\n\n";
-                //     }
-                // }
             });
 
             if (!lyrics) {
                 throw new Error('Lyrics could not be extracted.');
             }
 
-            return { artist_name, track_name, search_engine, artwork_url, lyrics: lyrics.trim() };
+            return {
+                title: title,
+                artist: artist,
+                slug: slug,
+                lyrics: lyrics.trim()
+            };
         } catch (error) {
             log.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
             return { message: 'No lyrics were found.', response: '404 Not Found' };
