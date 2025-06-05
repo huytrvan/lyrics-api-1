@@ -4,3 +4,5 @@ package-lock.json
 genius_store/
 musixmatch_store/
 proxy_cache/
+Dockerfile
+.dockerignore
