@@ -53,8 +53,8 @@ class Genius {
 
     private proxies: ProxyConfig[] = [];
     private currentProxyIndex = 0;
-    private maxRetries = 3;
-    private proxyRefreshInterval = 2 * 60 * 60 * 1000; // 2 hours
+    private maxRetries = 5;
+    private proxyRefreshInterval = 5 * 60 * 1000; // 5 minutes
     private lastProxyFetch = 0;
     private minUptime = 80; // Minimum uptime percentage for proxy selection
     private maxTimeout = 2000; // Maximum acceptable timeout in ms
@@ -279,7 +279,14 @@ class Genius {
                 return await this.makeProxyRequest(url, headers, proxy);
             } catch (error) {
                 lastError = error as Error;
-                log.warn(`Request failed with proxy ${proxy.host}:${proxy.port} (uptime: ${proxy.uptime}%), trying next...`);
+                const uptimeStr = proxy.uptime !== undefined
+                    ? proxy.uptime.toFixed(2)
+                    : 'unknown';
+
+                log.warn(
+                    `Request failed with proxy ${proxy.host}:${proxy.port} (uptime: ${uptimeStr}%)
+                 trying next...`
+                );
 
                 // Add small delay between retries
                 if (attempt < this.maxRetries - 1) {
