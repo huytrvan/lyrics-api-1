@@ -21,15 +21,8 @@ function logDetails(req: Request, res: Response, next: NextFunction) {
     const browserDetails = `${agent.toAgent()} on ${agent.os}`;
     const ipAddress = req.ip;
 
-    const realIP = req.headers['x-forwarded-for'] || req.ip;
-    const origin = req.headers.origin || 'Direct/No Origin';
-    const referer = req.headers.referer || 'Direct/No Referer';
-
     log.success(`[${currentTime}] Request: ${req.method} ${req.originalUrl}`);
-    // log.warn(`[${currentTime}] User-Agent: ${browserDetails} | IP: ${ipAddress}`);
-    log.warn(`[${currentTime}] User-Agent: ${browserDetails}`);
-    log.info(`[${currentTime}] IP: ${ipAddress} | Real IP: ${realIP}`);
-    log.info(`[${currentTime}] Origin: ${origin} | Referer: ${referer}`);
+    log.warn(`[${currentTime}] User-Agent: ${browserDetails} | IP: ${ipAddress}`);
     next();
 }
 
