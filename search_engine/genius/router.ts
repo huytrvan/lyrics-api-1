@@ -4,6 +4,8 @@ import path from 'path';
 import fs from 'fs/promises';
 import Genius, { LyricsResponse, ErrorResponse } from './Genius';
 import log from '../../utils/logger';
+import { alertManager } from '../../utils/alerter';
+
 
 const genius = new Genius();
 const router: Router = express.Router();
@@ -152,6 +154,15 @@ router.get('/genius/lyrics', async (req: Request, res: Response) => {
             message: 'An error has occurred while fetching lyrics.',
             response: `500 Internal Server Error. Error: ${errorMsg}`,
         });
+    }
+});
+
+router.get('/genius/test-alert', async (req: Request, res: Response) => {
+    try {
+        await alertManager.sendCrashAlert('Manual test alert', 'Test endpoint triggered');
+        res.json({ message: 'Test alert sent successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send test alert', error: String(error) });
     }
 });
 
